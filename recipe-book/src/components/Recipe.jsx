@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 
+
+
 export default function Recipe()
 {
 
@@ -7,6 +9,7 @@ export default function Recipe()
     const [ingerdients,setIngerdients]=useState("");
     const [instructions,setInstructions]=useState("");
     const [recipes,setRecipes]=useState([]);
+    const[editingId,setEditingId]=useState(null);
 
     //save recipe to localstorage
     const saveRecipes=(updateRecipes)=>{
@@ -29,23 +32,55 @@ export default function Recipe()
             alert("please fill the all fields")
             return;
         }
-        const newRecipe={
+
+        if(editingId)
+        {
+            const updateRecipes=recipes.map((i)=>
+                i.id===editingId ? {...i,name:recipeName,ingerdients,instructions} : i
+            );
+            saveRecipes(updateRecipes);
+            setEditingId(null);
+        }
+
+        else
+        {
+            const newRecipe={
             id:Date.now(),name:recipeName,ingerdients,instructions
         }
-        saveRecipes([...recipes,newRecipe]);
+         saveRecipes([...recipes,newRecipe]);
+        }
+        
 
         //clear form date
         setRecipeName("");
         setIngerdients("");
         setInstructions("");
     }
+//delete recipe
+    const handleDelete=(id)=>{
+        const updateRecipes=recipes.filter((r)=>r.id!==id);
+        saveRecipes(updateRecipes);
+    }
+
+
+    //edit recipe
+
+    const handleEdit=(i)=>{
+        setRecipeName(i.name);
+        setIngerdients(i.ingerdients);
+        setInstructions(i.instructions);
+        setEditingId(i.id);
+    }
+
+
+
 
     return(
         <>
         <div>
             <h1>Recipe Book</h1>
             <form onSubmit={handleSubmit}>
-            <h2>Add Recipe</h2>
+            <h2>{editingId ? "Edit Recipe": "Add Recipe"}</h2>
             
             <label>Name:</label><br />
             <input type="text" value={recipeName} onChange={(e)=>setRecipeName(e.target.value)} /><br />
@@ -56,7 +91,7 @@ export default function Recipe()
             <label>Instruction:</label><br />
              <textarea value={instructions} onChange={(e)=>setInstructions(e.target.value)}></textarea><br />
             
-             <button type="submit">Add Recipe</button>
+             <button type="submit">{editingId ? "Edit Recipe": "Add Recipe"}</button>
              </form>
 
             <h3>All Recipes</h3>
@@ -65,10 +100,14 @@ export default function Recipe()
                 recipes.map((i)=>(
                     <div key={i.id}>
                         <h4>Recipe Name:{i.name}</h4>
+                        
                         <p><strong>Ingredients:</strong>{i.ingerdients}</p>
+                        
                          <p><strong>Instruction:</strong>{i.instructions}</p>
-                         <button>Edit</button>
-                         <button>Delete</button>
+                        
+                         <button onClick={()=>{handleEdit(i)}}>Edit</button>
+                        
+                         <button onClick={()=>handleDelete(i.id)}>Delete</button>
 
                     </div>
                 ))

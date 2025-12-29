@@ -1,5 +1,5 @@
 import Recipe from "./components/Recipe"
-
+import "./Recipe.css";
 
 function App() {
  
